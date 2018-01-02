@@ -6,7 +6,7 @@ var ObjectID = require('mongodb').ObjectID;
 // const url = 'mongodb://localhost:27017';
 
 // Database Name
-const dbName = 'mogodbDemo';
+//const dbName = 'mogodbDemo';
 
 let query = function (dbName, callback) {
     return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ let query = function (dbName, callback) {
 }
 
 
-const insert = (table, obj) => {
+const insert = (dbName,table, obj) => {
     return query(dbName, function (db) {
         return new Promise((resolve, reject) => {
             const collection = db.collection(table);
@@ -40,7 +40,7 @@ const insert = (table, obj) => {
     })
 }
 
-const remove = (table, id) => {
+const remove = (dbName,table, id) => {
     return query(dbName, function (db) {
         return new Promise((resolve, reject) => {
             const collection = db.collection(table);
@@ -60,7 +60,7 @@ const remove = (table, id) => {
     })
 }
 
-const updata = (table, id, obj) => {
+const updata = (dbName,table, id, obj) => {
     return query(dbName, function (db) {
         return new Promise((resolve, reject) => {
             const collection = db.collection(table);
@@ -82,10 +82,10 @@ const updata = (table, id, obj) => {
     })
 }
 
-const findId = (table, id) => {
+const findId = (dbName,table, id) => {
     return query(dbName, function (db) {
         return new Promise((resolve, reject) => {
-            const collection = db.collection(table);
+            const collection = db.collection(table)
             collection.find({
                 _id: new ObjectID(id)
             }).toArray(
@@ -102,9 +102,49 @@ const findId = (table, id) => {
     })
 }
 
+//分页查询
+const findTablePage = (dbName,table,filter,pageNum,pageSize) =>{
+     filter = filter|| {}
+     pageNum = pageNum|| 1
+     pageSize = pageSize|| 10
+    return query(dbName,function(db){
+        return new Promise((resolve,reject)=>{
+            const collection = db.collection(table)
+            collection.find(filter).limit(pageSize).skip((pageNum-1)*pageSize).toArray((err,result)=>{
+                if(err){
+                    reject(err)
+                }else{
+                    console.dir(result)
+                    resolve(result)
+                }
+            })
+        })
+    })
+}
+
+//查询表格
+const findTableList = (dbName,table,filter) =>{
+     filter = filter|| {}
+    return query(dbName,function(db){
+        return new Promise((resolve,reject)=>{
+            const collection = db.collection(table)
+            collection.find(filter).toArray((err,result)=>{
+                if(err){
+                    reject(err)
+                }else{
+                    console.dir(result)
+                    resolve(result)
+                }
+            })
+        })
+    })
+}
+
 module.exports = {
     insert,
     remove,
     updata,
-    findId
+    findId,
+    findTablePage,
+    findTableList
 }
